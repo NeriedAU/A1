@@ -1,5 +1,5 @@
 <?php
-	include_once('db.php');
+	require_once('db.php');
 	
 	try {
 		$db = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
@@ -8,5 +8,8 @@
 	}
 	catch(PDOException $e) {
 		echo $e->getMessage();
+	}
+	finally {
+		unset($user, $pass);
 	}
 ?>
