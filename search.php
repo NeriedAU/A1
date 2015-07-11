@@ -103,7 +103,7 @@
 				
 				<div class="form-group">	
 					<!-- Minimum number of bottles sold for any wine -->
-					<label for "searchInputMinWineSold">Minimum total bottles sold in an order</label>
+					<label for "searchInputMinWineSold">Minimum Total Bottles Sold</label>
 					<input type="number" name="minSold" class="form-control" id="searchInputMinWineSold" min="0">					
 				</div>
 				

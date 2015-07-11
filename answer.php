@@ -20,28 +20,42 @@
 	
 	if($wineRegion == 'All')
 		unset($wineRegion);
-	
-	$sql = "
-		SELECT  wine_id, wine_name, winery_name, region_name, variety, year, on_hand, cost
-		FROM wine 
-			NATURAL JOIN winery 
-			NATURAL JOIN region 
-			NATURAL JOIN grape_variety  
-			NATURAL JOIN inventory 
-			NATURAL JOIN items 
-		WHERE wine_name LIKE '$wineName%' 
-			AND winery_name LIKE '$wineryName%' 
-			AND region_name LIKE '$wineRegion%' 
-			AND variety = '$grapeVariety' 
-			AND year BETWEEN '$wineYearMin' AND '$wineYearMax' 
-			AND on_hand >= '$minInStock'";
-
-		if(!empty($minCost)) {
-			$sql .= "AND cost > '$minCost'";
-		}
 		
+	$sql = "
+			SELECT 
+				wine.wine_id,
+				wine.wine_name, 
+				winery.winery_name, 
+				region.region_name, 
+				GROUP_CONCAT(variety) AS grapes, 
+				wine.year, 
+				inventory.on_hand, 
+				inventory.cost, 
+				(SELECT SUM(qty) * price FROM items WHERE items.wine_id = wine.wine_id) AS revenue,
+				(SELECT SUM(qty) FROM items WHERE items.wine_id = wine.wine_id) AS total_sold
+			FROM wine
+			INNER JOIN winery ON wine.winery_id = winery.winery_id
+			INNER JOIN region ON winery.region_id = region.region_id
+			INNER JOIN wine_variety ON wine_variety.wine_id = wine.wine_id 
+			INNER JOIN grape_variety ON grape_variety.variety_id = wine_variety.variety_id
+			INNER JOIN inventory ON inventory.wine_id = wine.wine_id
+			WHERE wine.wine_name LIKE '$wineName%'
+			AND winery.winery_name LIKE '$wineryName%'
+			AND region.region_name LIKE '$wineRegion%'
+			AND wine.year BETWEEN '$wineYearMin' AND '$wineYearMax'
+			AND inventory.on_hand >= '$minInStock'";
+			
+		if(!empty($minCost))
+			$sql .= "AND inventory.cost > '$minCost'";
+			
 		if(!empty($maxCost))
-			$sql .= "AND cost < '$maxCost'";
+			$sql .= "AND inventory.cost < '$maxCost'";
+			
+		$sql .= "GROUP BY wine.wine_id
+			HAVING FIND_IN_SET(  '$grapeVariety', grapes )";
+		
+		if(!empty($minSold))
+			$sql .= "AND total_sold >= '$minSold'";
 	
 	$query_results = Array();
 	
@@ -49,14 +63,17 @@
 	$select_query->execute();
 	
 	 foreach($select_query->fetchAll() as $row) {
+		//Append $row to end of array
 		 $query_results[] = $row;
 	 }
 	
-	$smarty->assign('num_rows', count($query_results));
 	$smarty->assign('sql', $sql);
-	$smarty->assign('result', $query_results);
-	$smarty->display('results.tpl');
 	
+	session_start();
+	$_SESSION["results"] = $query_results;
+	header("Location: results.php?session=" . session_id());
+	echo "Session = " . session_id();
+		
 	$db = null;
 	
 ?>
