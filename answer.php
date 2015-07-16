@@ -7,16 +7,16 @@
 	$smarty->setTemplateDir('/home/ubuntu/webroot/a1/views');
 	$smarty->setCompileDir('/home/ubuntu/webroot/a1/temp');
 	
-	$wineName = $_GET['wineName'];	
-	$wineryName = $_GET['wineryName'];
-	$wineRegion = $_GET['wineRegion'];
-	$grapeVariety = $_GET['grapeVariety'];
-	$wineYearMin = $_GET['wineYearMin'];
-	$wineYearMax = $_GET['wineYearMax'];
-	$minInStock = $_GET['minInStock'];
-	$minSold = $_GET['minSold'];
-	$minCost = $_GET['minCost'];
-	$maxCost = $_GET['maxCost'];
+	$wineName = 		validateStrInput($_GET['wineName'], 50);	
+	$wineryName = 		validateStrInput($_GET['wineryName'], 100);
+	$wineRegion = 		validateStrInput($_GET['wineRegion'], 100);
+	$grapeVariety = 	validateStrInput($_GET['grapeVariety'], 50);
+	$wineYearMin = 	validateNumInput($_GET['wineYearMin'], 4);
+	$wineYearMax = 	validateNumInput($_GET['wineYearMax'], 4);
+	$minInStock = 		validateNumInput($_GET['minInStock'], 5);
+	$minSold = 			validateNumInput($_GET['minSold'], 10);
+	$minCost = 			validateNumInput($_GET['minCost'], 7);
+	$maxCost = 			validateNumInput($_GET['maxCost'], 7);
 	
 	if($wineRegion == 'All')
 		unset($wineRegion);
@@ -59,9 +59,14 @@
 	
 	$query_results = Array();
 	
-	$select_query = $db->prepare($sql);
-	$select_query->execute();
-	
+	try {	
+		$select_query = $db->prepare($sql);
+		$select_query->execute();	
+	}
+	catch(PDOException $e) {
+		echo $e->getMessage();
+	}
+		
 	 foreach($select_query->fetchAll() as $row) {
 		//Append $row to end of array
 		 $query_results[] = $row;
@@ -72,8 +77,33 @@
 	session_start();
 	$_SESSION["results"] = $query_results;
 	header("Location: results.php?session=" . session_id());
-	echo "Session = " . session_id();
 		
 	$db = null;
+	
+	function validateStrInput($input, $maxLength) {
+	
+		$input = validateLength($input, $maxLength);		
+		$input = trim($input);
+		$input = stripslashes($input);
+		return $input;
+	}
+	
+	function validateNumInput($input, $maxLength) {
+		$input = validateLength($input, $maxLength);	
+		
+		if(!is_numeric($input))
+			return 0;
+		
+		return $input;
+	}
+	
+	function validateLength($input, $maxLength) {
+		if(strlen($input) > $maxLength)
+			$input = substr($input, 0, $maxLength);
+		
+		return $input;
+	}
+
+
 	
 ?>

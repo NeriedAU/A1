@@ -109,12 +109,12 @@
 				
 				<div class="form-group">	
 					<label for "searchInputMinCost">Minimum cost per bottle</label>
-					<input type="number" name="minCost" class="form-control" id="searchInputMinCost">					
+					<input type="number" step="any" name="minCost" class="form-control" id="searchInputMinCost">					
 				</div>
 				
 				<div class="form-group">	
 					<label for "searchInputMaxCost">Maximum cost per bottle</label>
-					<input type="number" name="maxCost" class="form-control" id="searchInputMaxCost">					
+					<input type="number" step="any" name="maxCost" class="form-control" id="searchInputMaxCost">					
 				</div>
 				
 				<button type="submit" class="btn btn-primary form-control">Search</button>
