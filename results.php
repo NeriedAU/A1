@@ -1,8 +1,9 @@
 <?php
-	//Using Smarty Template Engine
+	
 	session_id($_GET['session']);
 	session_start();
-	//print_r($_SESSION);
+	
+	//Using Smarty Template Engine
 	require('/home/ubuntu/composer/vendor/smarty/smarty/libs/Smarty.class.php');
 	$smarty = new Smarty();
 	$smarty->setTemplateDir('/home/ubuntu/webroot/a1/views');

@@ -1,12 +1,8 @@
 <?php
-	//Using Smarty Template Engine
-	require('/home/ubuntu/composer/vendor/smarty/smarty/libs/Smarty.class.php');
+
 	require_once('connect.php');
 	
-	$smarty = new Smarty();
-	$smarty->setTemplateDir('/home/ubuntu/webroot/a1/views');
-	$smarty->setCompileDir('/home/ubuntu/webroot/a1/temp');
-	
+	//Local variables filled with form data. Validated before being assigned.
 	$wineName = 		validateStrInput($_GET['wineName'], 50);	
 	$wineryName = 		validateStrInput($_GET['wineryName'], 100);
 	$wineRegion = 		validateStrInput($_GET['wineRegion'], 100);
@@ -18,9 +14,11 @@
 	$minCost = 			validateNumInput($_GET['minCost'], 7);
 	$maxCost = 			validateNumInput($_GET['maxCost'], 7);
 	
+	//Unset $wineRegion if it equals 'All' to search for wines from any region.
 	if($wineRegion == 'All')
 		unset($wineRegion);
-		
+	
+	//SQL Query to be used to search the winestore database
 	$sql = "
 			SELECT 
 				wine.wine_id,
@@ -44,10 +42,12 @@
 			AND region.region_name LIKE '$wineRegion%'
 			AND wine.year BETWEEN '$wineYearMin' AND '$wineYearMax'
 			AND inventory.on_hand >= '$minInStock'";
-			
+		
+		//If $minCost not empty, append additional where clause to the sql query.
 		if(!empty($minCost))
 			$sql .= "AND inventory.cost > '$minCost'";
-			
+		
+		//If $maxCost not empty, append additional where clause to the sql query.
 		if(!empty($maxCost))
 			$sql .= "AND inventory.cost < '$maxCost'";
 			
@@ -64,6 +64,7 @@
 		$select_query->execute();	
 	}
 	catch(PDOException $e) {
+		//Generally wouldn't echo this for the user to see, but might be helpful for this assignment.
 		echo $e->getMessage();
 	}
 		
@@ -72,10 +73,8 @@
 		 $query_results[] = $row;
 	 }
 	
-	$smarty->assign('sql', $sql);
-	
-	session_start();
-	$_SESSION["results"] = $query_results;
+	session_start();	
+	$_SESSION["results"] = $query_results;	
 	header("Location: results.php?session=" . session_id());
 		
 	$db = null;

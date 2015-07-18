@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Search Results</title>
+		<title>Wine Store - Search Results</title>
 		<link rel="stylesheet" href="css/bootstrap.min.css" />
 	</head>
 	<body>
